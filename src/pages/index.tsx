@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { type NextPage } from "next";
 import Head from "next/head";
@@ -6,7 +7,6 @@ import Row from "./row";
 import alphabet from "../alphabet.json";
 
 const Home: NextPage = () => {
-  const theWord = "hello";
   const [guessesState, setGuessesState] = useState(
     [
       {guess: "", locked: false}, 
@@ -18,10 +18,11 @@ const Home: NextPage = () => {
     ]
   );
   const [guessIndex, setGuessIndex] = useState(0);
+  const [gamePlaying, setGamePlaying] = useState(true);
 
   useEffect(() => {
-    console.log("Started use effect");
-  }, [])
+    console.log("GAMEPLAYING" +gamePlaying);
+  }, [gamePlaying]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -35,10 +36,12 @@ const Home: NextPage = () => {
         console.log("ENTER");
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, locked: true};
         setGuessesState(guessesState => guessesStateCopy)
-        setGuessIndex(guessIndex => guessIndex + 1);
-      } else if ('BACKSPACE' === upperCaseKey || 'DELETE' === upperCaseKey) {
+        guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
+      } else if (('BACKSPACE' === upperCaseKey || 'DELETE' === upperCaseKey) && gamePlaying) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
+        setGuessesState(guessesState => guessesStateCopy);
       }
+      console.log(gamePlaying);
       console.log(guessesState);
     }
     document.addEventListener('keydown', handleKeyDown, false);
