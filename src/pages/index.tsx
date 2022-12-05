@@ -60,6 +60,7 @@ const Home: NextPage = () => {
       console.log('gamelogic ' + guessesStateCopy[guessIndex]!.guess)
       if (words.includes(guessesStateCopy[guessIndex]!.guess)) {
         const correctArrayMap = guessesStateCopy[guessIndex]!.guess.split("").map((guess, idx) => {
+          console.log("number of occur: " + [...randomWordState].filter(x => x === guess).length);
           if (randomWordState[idx] === guess) return "Y";
           else if (randomWordState.includes(guess)) return "M";
           else return "N";
