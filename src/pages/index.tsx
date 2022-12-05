@@ -1,43 +1,96 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import Row from "./row";
 import alphabet from "../alphabet.json";
+import Row from "../components/row";
+import words from "../sgb-words.json";
+import anime from "animejs";
 
 const Home: NextPage = () => {
   const [guessesState, setGuessesState] = useState(
     [
-      {guess: "", locked: false}, 
-      {guess: "", locked: false}, 
-      {guess: "", locked: false}, 
-      {guess: "", locked: false}, 
-      {guess: "", locked: false}, 
-      {guess: "", locked: false}
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 0}, 
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 1}, 
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 2}, 
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 3}, 
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 4}, 
+      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 5}
     ]
   );
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
+  const [winState, setWinState] = useState(false);
+  const [randomWordState, setRandomWordState] = useState("");
 
   useEffect(() => {
-    console.log("GAMEPLAYING" +gamePlaying);
-  }, [gamePlaying]);
+    const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
+    setRandomWordState(randomWordState => randomWord);
+    console.log(randomWord);
+    //console.log("seeinghowmabytimes");
+  }, []);
 
   useEffect(() => {
+    const handleNotWordAnimation = (guessIndex: number) => {
+      console.log(guessIndex);
+      const xMax = 16;
+      anime({
+        targets: `.box-${guessIndex}`,
+        easing: 'easeInOutSine',
+        duration: 550,
+        translateX: [{value: xMax * -1}, {value: xMax}, {value: xMax/-2}, {value: xMax/2}, {value: 0}]
+      });
+    }
+
+    const handleAnimations = (guessIndex: number, correctArrayMap: string[]) => {
+      correctArrayMap.forEach((answer, idx) => {
+        const colorMap = correctArrayMap.map((answer) => {if (answer === 'Y') return "#bbf7d0"; if (answer === 'M') return "#fed7aa"; if (answer === 'N') return "#fecdd3"});
+        anime({
+          targets: `.box-${guessIndex}-${idx}`,
+          backgroundColor: `${colorMap[idx]}`,
+          delay: anime.stagger(0, {start: 100 * idx}),
+          easing: 'cubicBezier(.5, .05, .5, .6)'
+        });
+      })
+    }
+
+    const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], locked: boolean, row: number}[]) => {
+      console.log('gamelogic ' + guessesStateCopy[guessIndex]!.guess)
+      if (words.includes(guessesStateCopy[guessIndex]!.guess)) {
+        const correctArrayMap = guessesStateCopy[guessIndex]!.guess.split("").map((guess, idx) => {
+          if (randomWordState[idx] === guess) return "Y";
+          else if (randomWordState.includes(guess)) return "M";
+          else return "N";
+        });
+        guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap, locked: true};
+        setGuessesState(guessesState => guessesStateCopy)
+        if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
+          console.log("Win");
+          setGamePlaying(false);
+          setWinState(true);
+        }
+        handleAnimations(guessIndex, correctArrayMap);
+        guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
+      } else {
+        handleNotWordAnimation(guessIndex);
+        console.log('not in wordlist')
+      }
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      const upperCaseKey = e.key.toUpperCase();
+      if (!gamePlaying) return;
+      const lowerCaseKey = e.key.toLowerCase();
       const guessesStateCopy = Array.from(guessesState);
       const currentGuess = guessesStateCopy[guessIndex]!.guess;
-      if (alphabet.includes(upperCaseKey)) {
-        guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.concat(upperCaseKey)};
+      if (alphabet.includes(lowerCaseKey)) {
+        guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.concat(lowerCaseKey)};
         if (guessesState[guessIndex]!.guess.length < 5) setGuessesState(guessesState => guessesStateCopy)
-      } else if ('ENTER' === upperCaseKey && guessesState[guessIndex]!.guess.length === 5) {
-        console.log("ENTER");
-        guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, locked: true};
-        setGuessesState(guessesState => guessesStateCopy)
-        guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
-      } else if (('BACKSPACE' === upperCaseKey || 'DELETE' === upperCaseKey) && gamePlaying) {
+      } else if ('enter' === lowerCaseKey && guessesState[guessIndex]!.guess.length === 5) {
+        // console.log("ENTER");
+        handleEnterDown(guessesStateCopy);
+      } else if (('backspace' === lowerCaseKey || 'delete' === lowerCaseKey)) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
         setGuessesState(guessesState => guessesStateCopy);
       }
@@ -54,7 +107,7 @@ const Home: NextPage = () => {
         <title>Wordle Clone</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-200">
         <div className="container flex flex-col items-center justify-center gap-4">
           <Row guessState={guessesState[0]!}/>
           <Row guessState={guessesState[1]!}/>
