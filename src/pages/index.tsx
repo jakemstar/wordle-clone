@@ -22,7 +22,6 @@ const Home: NextPage = () => {
   );
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
-  const [winState, setWinState] = useState(false);
   const [randomWordState, setRandomWordState] = useState("");
 
   useEffect(() => {
@@ -56,6 +55,20 @@ const Home: NextPage = () => {
       })
     }
 
+    const handleWinAnimation = () => {
+      const currentIndex = guessIndex;
+      for (let i = currentIndex; i < 6; i++){
+        for (let x = 0; x < 5; x++){
+          anime({
+            targets: `.box-${i}-${x}`,
+            backgroundColor: "#bbf7d0",
+            delay: anime.stagger(0, {start: 100 * x * i}),
+            easing: 'cubicBezier(.5, .05, .5, .6)'
+          });
+        }
+      }
+    }
+
     const createCorrectArrayMap = (guess: string) => {
       return guess.split("").map((guess, idx) => {
         console.log("number of occur: " + [...randomWordState].filter(x => x === guess).length);
@@ -78,9 +91,10 @@ const Home: NextPage = () => {
         if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
           console.log("Win");
           setGamePlaying(false);
-          setWinState(true);
+          handleWinAnimation();
+        } else {
+          handleAnimations(guessIndex, correctArrayMap);
         }
-        handleAnimations(guessIndex, correctArrayMap);
         guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
       } else {
         handleNotWordAnimation(guessIndex);
