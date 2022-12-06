@@ -56,15 +56,23 @@ const Home: NextPage = () => {
       })
     }
 
+    const createCorrectArrayMap = (guess: string) => {
+      return guess.split("").map((guess, idx) => {
+        console.log("number of occur: " + [...randomWordState].filter(x => x === guess).length);
+        if (randomWordState[idx] === guess) return "Y";
+        else if (randomWordState.includes(guess)) return "M";
+        else return "N";
+      });
+    }
+
+    const inWordList = (word: string) => {
+      return words.includes(word);
+    }
+
     const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], locked: boolean, row: number}[]) => {
       console.log('gamelogic ' + guessesStateCopy[guessIndex]!.guess)
-      if (words.includes(guessesStateCopy[guessIndex]!.guess)) {
-        const correctArrayMap = guessesStateCopy[guessIndex]!.guess.split("").map((guess, idx) => {
-          console.log("number of occur: " + [...randomWordState].filter(x => x === guess).length);
-          if (randomWordState[idx] === guess) return "Y";
-          else if (randomWordState.includes(guess)) return "M";
-          else return "N";
-        });
+      if (inWordList(guessesStateCopy[guessIndex]!.guess)) {
+        const correctArrayMap = createCorrectArrayMap(guessesStateCopy[guessIndex]!.guess)
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap, locked: true};
         setGuessesState(guessesState => guessesStateCopy)
         if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
