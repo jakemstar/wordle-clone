@@ -70,26 +70,52 @@ const Home: NextPage = () => {
     }
 
     const createCorrectArrayMap = (guess: string) => {
-      return guess.split("").map((guess, idx) => {
-        console.log("number of occur: " + [...randomWordState].filter(x => x === guess).length);
-        if (randomWordState[idx] === guess) return "Y";
-        else if (randomWordState.includes(guess)) return "M";
-        else return "N";
+      const guessArray = guess.split("");
+      const reverseCorrectArray = guessArray.map((guess, idx) => {
+        if (randomWordState[idx] === guess) return {guess, correct: "Y"};
+        else if (randomWordState.includes(guess)) return {guess, correct: "M"};
+        else return {guess, correct: "N"};
       });
+      reverseCorrectArray.reverse();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-const
+      let correctArray: { guess: string; correct: string; }[] = [];
+      reverseCorrectArray.forEach((letterGuess, idx) => {
+        if (letterGuess.correct === "M") {
+          const countLetterInWord = [...randomWordState].filter(x => x === letterGuess.guess).length;
+          const countLetterStatusY = reverseCorrectArray.filter(x => x.guess === letterGuess.guess && x.correct === "Y").length;
+          const countLetterStatusYMLeft = reverseCorrectArray.slice(idx).filter(x => x.guess === letterGuess.guess && (x.correct === "Y" || x.correct === "M")).length;
+          if (countLetterStatusY >= countLetterInWord) {
+            correctArray.push({guess: letterGuess.guess, correct: "N"});
+          } else if (countLetterStatusYMLeft > countLetterInWord) {
+            correctArray.push({guess: letterGuess.guess, correct: "N"});
+          } else {
+            correctArray.push(letterGuess);
+          }
+        } else {
+          correctArray.push(letterGuess);
+        }
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const something = correctArray.reverse().map((guess: any) => {
+        return guess.correct
+      });
+      console.log(something)
+      return something
     }
 
     const inWordList = (word: string) => {
-      return words.includes(word);
+      //return words.includes(word);
+      return true;
     }
 
     const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], locked: boolean, row: number}[]) => {
-      console.log('gamelogic ' + guessesStateCopy[guessIndex]!.guess)
-      if (inWordList(guessesStateCopy[guessIndex]!.guess)) {
+      //console.log('gamelogic ' + guessesStateCopy[guessIndex]!.guess)
+      if (inWordList(guessesStateCopy[guessIndex]!.guess) && guessesState[guessIndex]!.guess.length === 5) {
         const correctArrayMap = createCorrectArrayMap(guessesStateCopy[guessIndex]!.guess)
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap, locked: true};
         setGuessesState(guessesState => guessesStateCopy)
         if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
-          console.log("Win");
+          //console.log("Win");
           setGamePlaying(false);
           handleWinAnimation();
         } else {
@@ -98,7 +124,6 @@ const Home: NextPage = () => {
         guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
       } else {
         handleNotWordAnimation(guessIndex);
-        console.log('not in wordlist')
       }
     }
 
@@ -110,17 +135,15 @@ const Home: NextPage = () => {
       if (alphabet.includes(lowerCaseKey)) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.concat(lowerCaseKey)};
         if (guessesState[guessIndex]!.guess.length < 5) setGuessesState(guessesState => guessesStateCopy)
-      } else if ('enter' === lowerCaseKey && guessesState[guessIndex]!.guess.length === 5) {
+      } else if ('enter' === lowerCaseKey) {
         // console.log("ENTER");
         handleEnterDown(guessesStateCopy);
       } else if (('backspace' === lowerCaseKey || 'delete' === lowerCaseKey)) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
         setGuessesState(guessesState => guessesStateCopy);
-      } else {
-        handleNotWordAnimation(guessIndex);
       }
-      console.log(gamePlaying);
-      console.log(guessesState);
+      //console.log(gamePlaying);
+      //console.log(guessesState);
     }
     document.addEventListener('keydown', handleKeyDown, false);
     return () => document.removeEventListener('keydown', handleKeyDown);
