@@ -94,6 +94,8 @@ const Home: NextPage = () => {
       } else if (('backspace' === lowerCaseKey || 'delete' === lowerCaseKey)) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
         setGuessesState(guessesState => guessesStateCopy);
+      } else {
+        handleNotWordAnimation(guessIndex);
       }
       console.log(gamePlaying);
       console.log(guessesState);
