@@ -104,8 +104,7 @@ const Home: NextPage = () => {
     }
 
     const inWordList = (word: string) => {
-      //return words.includes(word);
-      return true;
+      return words.includes(word);
     }
 
     const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], locked: boolean, row: number}[]) => {
