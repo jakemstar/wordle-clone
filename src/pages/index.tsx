@@ -55,6 +55,18 @@ const Home: NextPage = () => {
       })
     }
 
+    const handleLetterAnimations = (row: number, column: number) => {
+      console.log('letter animation')
+      console.log(`.letter-${row}-${column}`)
+      anime({
+        targets: `.letter-${row}-${column}`,
+        opacity: [0,1],
+        translateY: [10,0],
+        easing: "easeOutExpo",
+        duration: 700,
+      })
+    }
+
     const handleWinAnimation = () => {
       const currentIndex = guessIndex;
       for (let i = currentIndex; i < 6; i++){
@@ -99,7 +111,6 @@ const Home: NextPage = () => {
       const something = correctArray.reverse().map((guess: any) => {
         return guess.correct
       });
-      console.log(something)
       return something
     }
 
@@ -133,7 +144,10 @@ const Home: NextPage = () => {
       const currentGuess = guessesStateCopy[guessIndex]!.guess;
       if (alphabet.includes(lowerCaseKey)) {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.concat(lowerCaseKey)};
-        if (guessesState[guessIndex]!.guess.length < 5) setGuessesState(guessesState => guessesStateCopy)
+        if (guessesState[guessIndex]!.guess.length < 5) {
+          handleLetterAnimations(guessIndex, guessesState[guessIndex]!.guess.length);
+          setGuessesState(guessesState => guessesStateCopy)
+        }
       } else if ('enter' === lowerCaseKey) {
         // console.log("ENTER");
         handleEnterDown(guessesStateCopy);
@@ -156,12 +170,12 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-200">
         <div className="container flex flex-col items-center justify-center gap-4">
-          <Row guessState={guessesState[0]!}/>
-          <Row guessState={guessesState[1]!}/>
-          <Row guessState={guessesState[2]!}/>
-          <Row guessState={guessesState[3]!}/>
-          <Row guessState={guessesState[4]!}/>
-          <Row guessState={guessesState[5]!}/>
+          <Row guessState={guessesState[0]!} />
+          <Row guessState={guessesState[1]!} />
+          <Row guessState={guessesState[2]!} />
+          <Row guessState={guessesState[3]!} />
+          <Row guessState={guessesState[4]!} />
+          <Row guessState={guessesState[5]!} />
         </div>
       </main>
     </>
