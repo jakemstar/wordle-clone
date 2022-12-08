@@ -74,8 +74,6 @@ const Home: NextPage = () => {
     }
 
     const handleLetterAnimations = (row: number, column: number) => {
-      //console.log('letter animation')
-      //console.log(`.letter-${row}-${column}`)
       anime({
         targets: `.letter-${row}-${column}`,
         opacity: [0,1],
@@ -119,19 +117,22 @@ const Home: NextPage = () => {
           newKeyboardState[currentAnswer] = 'Y';
           anime({
             targets: `.${answer.guess.toUpperCase()}`,
-            backgroundColor: "#bbf7d0"
+            backgroundColor: "#bbf7d0",
+            easing: 'cubicBezier(.5, .05, .5, .6)'
           });
         } else if (answer.correct === 'M' && !(newKeyboardState[currentAnswer] === "Y")) {
           newKeyboardState[currentAnswer] = 'M';
           anime({
             targets: `.${answer.guess.toUpperCase()}`,
-            backgroundColor: "#fed7aa"
+            backgroundColor: "#fed7aa",
+            easing: 'cubicBezier(.5, .05, .5, .6)'
           });
         } else if (answer.correct === 'N' && !(newKeyboardState[currentAnswer] === "Y") && !(newKeyboardState[currentAnswer] === "M")) {
           newKeyboardState[currentAnswer] = 'N';
           anime({
             targets: `.${answer.guess.toUpperCase()}`,
-            backgroundColor: "#fecdd3"
+            backgroundColor: "#fecdd3",
+            easing: 'cubicBezier(.5, .05, .5, .6)'
           });
         }
       })
