@@ -8,6 +8,9 @@ import alphabet from "../alphabet.json";
 import Row from "../components/row";
 import words from "../sgb-words.json";
 import anime from "animejs";
+import Keyboard from 'react-simple-keyboard';
+import 'react-simple-keyboard/build/css/index.css';
+import { buttonThemes } from "../buttonClasses";
 
 const Home: NextPage = () => {
   const [guessesState, setGuessesState] = useState(
@@ -20,9 +23,25 @@ const Home: NextPage = () => {
       {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 5}
     ]
   );
+  const [keyboardState, setKeyboardState] = useState(
+    {
+      A: "", B: "", C: "", D: "", E: "", F: "", G: "", H: "", 
+      I: "", J: "", K: "", L: "", M: "", N: "", O: "", P: "", 
+      Q: "", R: "", S: "", T: "", U: "", V: "", W: "", X: "", 
+      Y: "", Z: ""
+    }
+  );
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
   const [randomWordState, setRandomWordState] = useState("");
+  const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onKeyPress = (button: any) => {
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: button,
+    }));
+  }
 
   useEffect(() => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
@@ -33,7 +52,6 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const handleNotWordAnimation = (guessIndex: number) => {
-      console.log(guessIndex);
       const xMax = 16;
       anime({
         targets: `.box-${guessIndex}`,
@@ -56,8 +74,8 @@ const Home: NextPage = () => {
     }
 
     const handleLetterAnimations = (row: number, column: number) => {
-      console.log('letter animation')
-      console.log(`.letter-${row}-${column}`)
+      //console.log('letter animation')
+      //console.log(`.letter-${row}-${column}`)
       anime({
         targets: `.letter-${row}-${column}`,
         opacity: [0,1],
@@ -65,6 +83,17 @@ const Home: NextPage = () => {
         easing: "easeOutExpo",
         duration: 700,
       })
+    }
+
+    const handleDeleteAnimation = (row: number, column: number) => {
+      setDeleteAnimationPlaying(true);
+      return anime({
+        targets: `.letter-${row}-${column}`,
+        opacity: [1,0],
+        translateY: [0,-10],
+        easing: "easeOutExpo",
+        duration: 100,
+      }).finished;
     }
 
     const handleWinAnimation = () => {
@@ -79,6 +108,34 @@ const Home: NextPage = () => {
           });
         }
       }
+    }
+    
+    const handleKeyColors = (correctArray: { guess: string; correct: string; }[]) => {
+      console.log(correctArray);
+      correctArray.forEach((answer) => {
+        const newKeyboardState = keyboardState;
+        const currentAnswer = answer.guess.toUpperCase() as keyof typeof newKeyboardState;
+        if (answer.correct === 'Y' && !(newKeyboardState[currentAnswer] === "Y")) {
+          newKeyboardState[currentAnswer] = 'Y';
+          anime({
+            targets: `.${answer.guess.toUpperCase()}`,
+            backgroundColor: "#bbf7d0"
+          });
+        } else if (answer.correct === 'M' && !(newKeyboardState[currentAnswer] === "Y")) {
+          newKeyboardState[currentAnswer] = 'M';
+          anime({
+            targets: `.${answer.guess.toUpperCase()}`,
+            backgroundColor: "#fed7aa"
+          });
+        } else if (answer.correct === 'N' && !(newKeyboardState[currentAnswer] === "Y") && !(newKeyboardState[currentAnswer] === "M")) {
+          newKeyboardState[currentAnswer] = 'N';
+          anime({
+            targets: `.${answer.guess.toUpperCase()}`,
+            backgroundColor: "#fecdd3"
+          });
+        }
+      })
+      console.log(keyboardState);
     }
 
     const createCorrectArrayMap = (guess: string) => {
@@ -111,6 +168,7 @@ const Home: NextPage = () => {
       const something = correctArray.reverse().map((guess: any) => {
         return guess.correct
       });
+      handleKeyColors(correctArray);
       return something
     }
 
@@ -139,6 +197,7 @@ const Home: NextPage = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gamePlaying) return;
+      if (!deleteAnimationPlaying) {
       const lowerCaseKey = e.key.toLowerCase();
       const guessesStateCopy = Array.from(guessesState);
       const currentGuess = guessesStateCopy[guessIndex]!.guess;
@@ -148,19 +207,21 @@ const Home: NextPage = () => {
           handleLetterAnimations(guessIndex, guessesState[guessIndex]!.guess.length);
           setGuessesState(guessesState => guessesStateCopy)
         }
-      } else if ('enter' === lowerCaseKey) {
-        // console.log("ENTER");
+      } else if ("enter" === lowerCaseKey || "{ent}" === lowerCaseKey) {
         handleEnterDown(guessesStateCopy);
-      } else if (('backspace' === lowerCaseKey || 'delete' === lowerCaseKey)) {
-        guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
-        setGuessesState(guessesState => guessesStateCopy);
-      }
+      } else if ((("backspace" === lowerCaseKey || "delete" === lowerCaseKey || "{backspace}" === lowerCaseKey) && !deleteAnimationPlaying)) {
+        handleDeleteAnimation(guessIndex, guessesState[guessIndex]!.guess.length-1).then(() => {
+          guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
+          setGuessesState(guessesState => guessesStateCopy);
+          setDeleteAnimationPlaying(false);
+        })
+      }}
       //console.log(gamePlaying);
       //console.log(guessesState);
     }
-    document.addEventListener('keydown', handleKeyDown, false);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [guessesState, guessIndex]);
+    document.addEventListener("keydown", handleKeyDown, false);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState]);
 
   return (
     <>
@@ -169,13 +230,29 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-200">
-        <div className="container flex flex-col items-center justify-center gap-4">
+        <div className="w-11/12 xs:w-10/12 md:w-auto flex flex-col items-center justify-center gap-2 sm:gap-4">
           <Row guessState={guessesState[0]!} />
           <Row guessState={guessesState[1]!} />
           <Row guessState={guessesState[2]!} />
           <Row guessState={guessesState[3]!} />
           <Row guessState={guessesState[4]!} />
           <Row guessState={guessesState[5]!} />
+          <Keyboard 
+            onKeyPress={onKeyPress}           
+            layout={{
+              default: [
+                "Q W E R T Y U I O P",
+                "A S D F G H J K L",
+                "{ent} Z X C V B N M {backspace}",
+              ]
+            }}
+            display={{
+              "{ent}": "enter",
+              "{backspace}": "←"
+            }}
+            theme="hg-theme-default custom-keyboard"
+            buttonTheme={buttonThemes}
+          />
         </div>
       </main>
     </>
