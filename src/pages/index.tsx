@@ -1,40 +1,122 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import anime from "animejs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import alphabet from "../alphabet.json";
-import Row from "../components/row";
-import words from "../sgb-words.json";
-import anime from "animejs";
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
-import { buttonThemes } from "../buttonClasses";
+import ResetButton from "../components/resetButton";
+import Row from "../components/row";
+import alphabet from "../util/alphabet.json";
+import { buttonThemes } from "../util/buttonClasses";
+import words from "../util/sgb-words.json";
 
 const Home: NextPage = () => {
-  const [guessesState, setGuessesState] = useState(
-    [
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 0}, 
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 1}, 
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 2}, 
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 3}, 
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 4}, 
-      {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 5}
-    ]
-  );
-  const [keyboardState, setKeyboardState] = useState(
-    {
-      A: "", B: "", C: "", D: "", E: "", F: "", G: "", H: "", 
-      I: "", J: "", K: "", L: "", M: "", N: "", O: "", P: "", 
-      Q: "", R: "", S: "", T: "", U: "", V: "", W: "", X: "", 
-      Y: "", Z: ""
-    }
-  );
+  const [guessesState, setGuessesState] = useState([
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 0}, 
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 1}, 
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 2}, 
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 3}, 
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 4}, 
+    {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 5}
+  ]);
+  const [keyboardState, setKeyboardState] = useState({
+    A: "", B: "", C: "", D: "", E: "", F: "", G: "", H: "", 
+    I: "", J: "", K: "", L: "", M: "", N: "", O: "", P: "", 
+    Q: "", R: "", S: "", T: "", U: "", V: "", W: "", X: "", 
+    Y: "", Z: ""
+  });
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
   const [randomWordState, setRandomWordState] = useState("");
   const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
+  const [winAnimationPlaying, setWinAnimationPlaying] = useState(false);
+  const [resetAnimationPlaying, setResetAnimationPlaying] = useState(false);
+
+  const handleResetLogic = () => {
+    if (winAnimationPlaying) return;
+    if (resetAnimationPlaying) return;
+    handleResetAnimation().then(() => {
+      const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
+      setGuessesState([
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 0}, 
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 1}, 
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 2}, 
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 3}, 
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 4}, 
+        {guess: "", correctArray: ["X", "X", "X", "X", "X"], locked: false, row: 5}
+      ]);
+      setKeyboardState({
+        A: "", B: "", C: "", D: "", E: "", F: "", G: "", H: "", 
+        I: "", J: "", K: "", L: "", M: "", N: "", O: "", P: "", 
+        Q: "", R: "", S: "", T: "", U: "", V: "", W: "", X: "", 
+        Y: "", Z: ""
+      })
+      setGuessIndex(0)
+      setGamePlaying(true)
+      setRandomWordState(randomWordState => randomWord);
+      setResetAnimationPlaying(false);
+      console.log(randomWord);
+    });
+  }
+
+  const handleResetAnimation = () => {
+    setResetAnimationPlaying(true)
+    // set key color
+    anime({
+      targets: '.hg-button',
+      backgroundColor: '#f8fafc',
+    })
+    // letters
+    anime({
+      targets: '.letter',
+      opacity: [1,0],
+      scale: 2,
+      easing: "easeOutExpo",
+      delay: anime.stagger(200, {grid: [5, 6], from: 'first'})
+    }).finished.then(() => {
+      anime({
+        targets: '.letter',
+        scale: 1,
+      })
+    })
+    // boxes
+    anime({
+      targets: '.box',
+      backgroundColor: '#f8fafc',
+      delay: anime.stagger(200, {grid: [5, 6], from: 'first'})
+      //delay: anime.stagger(200, {grid: [5, 6], from: 'first', start: 100})
+    })
+    // button
+    anime ({
+      targets: '.resetButton>svg',
+      rotateZ: 360,
+      easing: 'linear',
+      duration: 300
+    }).finished.then(() => {
+      anime ({
+        targets: '.resetButton>svg',
+        rotateZ: 0
+      })
+    })
+    anime({
+      targets: '.resetButton',
+      opacity: [1,0],
+      easing: 'spring(.8, 90, 9, 0)',
+      delay: 100,
+      translateY: 0
+    })
+    // keyboard
+    return anime({
+      targets: '.hg-button',
+      scale: [
+        {value: 1, easing: 'cubicBezier(.5, .05, .5, .6)', duration: 500},
+      ],
+      delay: anime.stagger(250, {grid: [9, 3], from: 'center', start: 1000})
+    }).finished
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onKeyPress = (button: any) => {
@@ -51,6 +133,19 @@ const Home: NextPage = () => {
   }, []);
 
   useEffect(() => {
+    const handleAnimations = (guessIndex: number, correctArrayMap: string[]) => {
+      correctArrayMap.forEach((answer, idx) => {
+        const colorMap = correctArrayMap.map((answer) => {if (answer === 'Y') return "#bbf7d0"; if (answer === 'M') return "#fed7aa"; if (answer === 'N') return "#fecdd3"});
+        anime({
+          targets: `.box-${guessIndex}-${idx}`,
+          backgroundColor: `${colorMap[idx]}`,
+          //scale: [1, 1.1, 1],
+          delay: anime.stagger(0, {start: 100 * idx}),
+          //easing: 'cubicBezier(.5, .05, .5, .6)'
+        });
+      })
+    }
+
     const handleNotWordAnimation = (guessIndex: number) => {
       const xMax = 16;
       anime({
@@ -59,18 +154,6 @@ const Home: NextPage = () => {
         duration: 550,
         translateX: [{value: xMax * -1}, {value: xMax}, {value: xMax/-2}, {value: xMax/2}, {value: 0}]
       });
-    }
-
-    const handleAnimations = (guessIndex: number, correctArrayMap: string[]) => {
-      correctArrayMap.forEach((answer, idx) => {
-        const colorMap = correctArrayMap.map((answer) => {if (answer === 'Y') return "#bbf7d0"; if (answer === 'M') return "#fed7aa"; if (answer === 'N') return "#fecdd3"});
-        anime({
-          targets: `.box-${guessIndex}-${idx}`,
-          backgroundColor: `${colorMap[idx]}`,
-          delay: anime.stagger(0, {start: 100 * idx}),
-          easing: 'cubicBezier(.5, .05, .5, .6)'
-        });
-      })
     }
 
     const handleLetterAnimations = (row: number, column: number) => {
@@ -95,23 +178,37 @@ const Home: NextPage = () => {
     }
 
     const handleWinAnimation = () => {
+      setWinAnimationPlaying(true);
       const currentIndex = guessIndex;
       for (let i = currentIndex; i < 6; i++){
         for (let x = 0; x < 5; x++){
           anime({
             targets: `.box-${i}-${x}`,
             backgroundColor: "#bbf7d0",
-            delay: anime.stagger(0, {start: 100 * x * i}),
-            easing: 'cubicBezier(.5, .05, .5, .6)'
+            delay: anime.stagger(0, {start: 50 * x * i}),
+            //easing: 'cubicBezier(.5, .05, .5, .6)'
           });
         }
       }
+      anime({
+        targets: '.hg-button',
+        scale: [
+          {value: 0, easing: 'cubicBezier(.5, .05, .5, .6)', duration: 500},
+        ],
+        delay: anime.stagger(300, {grid: [9, 3], from: 'center', start: 800})
+      })
+      return anime({
+        targets: '.resetButton',
+        opacity: [0,1],
+        easing: 'spring(.8, 90, 9, 0)',
+        delay: 2500,
+        translateY: -150
+      }).finished
     }
     
     const handleKeyColors = (correctArray: { guess: string; correct: string; }[]) => {
-      console.log(correctArray);
+      const newKeyboardState = keyboardState;
       correctArray.forEach((answer) => {
-        const newKeyboardState = keyboardState;
         const currentAnswer = answer.guess.toUpperCase() as keyof typeof newKeyboardState;
         if (answer.correct === 'Y' && !(newKeyboardState[currentAnswer] === "Y")) {
           newKeyboardState[currentAnswer] = 'Y';
@@ -136,7 +233,7 @@ const Home: NextPage = () => {
           });
         }
       })
-      console.log(keyboardState);
+      setKeyboardState(keyboardState => newKeyboardState);
     }
 
     const createCorrectArrayMap = (guess: string) => {
@@ -184,21 +281,20 @@ const Home: NextPage = () => {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap, locked: true};
         setGuessesState(guessesState => guessesStateCopy)
         if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
-          //console.log("Win");
           setGamePlaying(false);
-          handleWinAnimation();
+          handleWinAnimation().then(() => setWinAnimationPlaying(false));
         } else {
           handleAnimations(guessIndex, correctArrayMap);
         }
         guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
       } else {
-        handleNotWordAnimation(guessIndex);
+          handleNotWordAnimation(guessIndex);
       }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gamePlaying) return;
-      if (!deleteAnimationPlaying) {
+      if (deleteAnimationPlaying) return;
       const lowerCaseKey = e.key.toLowerCase();
       const guessesStateCopy = Array.from(guessesState);
       const currentGuess = guessesStateCopy[guessIndex]!.guess;
@@ -216,9 +312,7 @@ const Home: NextPage = () => {
           setGuessesState(guessesState => guessesStateCopy);
           setDeleteAnimationPlaying(false);
         })
-      }}
-      //console.log(gamePlaying);
-      //console.log(guessesState);
+      }
     }
     document.addEventListener("keydown", handleKeyDown, false);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -254,6 +348,7 @@ const Home: NextPage = () => {
             theme="hg-theme-default custom-keyboard"
             buttonTheme={buttonThemes}
           />
+          <ResetButton onClick={handleResetLogic} />
         </div>
       </main>
     </>
