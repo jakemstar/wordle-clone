@@ -7,6 +7,7 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
+import Answer from "../components/answer";
 import ResetButton from "../components/resetButton";
 import Row from "../components/row";
 import alphabet from "../util/alphabet.json";
@@ -34,10 +35,14 @@ const Home: NextPage = () => {
   const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
   const [winAnimationPlaying, setWinAnimationPlaying] = useState(false);
   const [resetAnimationPlaying, setResetAnimationPlaying] = useState(false);
+  const [loseAnimationPlaying, setLoseAnimationPlaying] = useState(false);
+  const [resetButtonClickable, setResetButtonClickable] = useState(false);
 
   const handleResetLogic = () => {
     if (winAnimationPlaying) return;
+    if (loseAnimationPlaying) return;
     if (resetAnimationPlaying) return;
+    setResetButtonClickable(false);
     handleResetAnimation().then(() => {
       const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
       setGuessesState([
@@ -64,11 +69,6 @@ const Home: NextPage = () => {
 
   const handleResetAnimation = () => {
     setResetAnimationPlaying(true)
-    // set key color
-    anime({
-      targets: '.hg-button',
-      backgroundColor: '#f8fafc',
-    })
     // letters
     anime({
       targets: '.letter',
@@ -107,6 +107,11 @@ const Home: NextPage = () => {
       easing: 'spring(.8, 90, 9, 0)',
       delay: 100,
       translateY: 0
+    })
+    // set key color
+    anime({
+      targets: '.hg-button',
+      backgroundColor: '#f8fafc',
     })
     // keyboard
     return anime({
@@ -153,7 +158,7 @@ const Home: NextPage = () => {
         easing: 'easeInOutSine',
         duration: 550,
         translateX: [{value: xMax * -1}, {value: xMax}, {value: xMax/-2}, {value: xMax/2}, {value: 0}]
-      });
+      })
     }
 
     const handleLetterAnimations = (row: number, column: number) => {
@@ -175,6 +180,24 @@ const Home: NextPage = () => {
         easing: "easeOutExpo",
         duration: 100,
       }).finished;
+    }
+
+    const handleLoseAnimation = () => {
+      animateInAnswer();
+      anime({
+        targets: '.hg-button',
+        scale: [
+          {value: 0, easing: 'cubicBezier(.5, .05, .5, .6)', duration: 500},
+        ],
+        delay: anime.stagger(300, {grid: [9, 3], from: 'center', start: 800})
+      });
+      return anime({
+        targets: '.resetButton',
+        opacity: [0,1],
+        easing: 'spring(.8, 90, 9, 0)',
+        delay: 2500,
+        translateY: -150
+      }).finished
     }
 
     const handleWinAnimation = () => {
@@ -264,14 +287,34 @@ const Home: NextPage = () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const something = correctArray.reverse().map((guess: any) => {
-        return guess.correct
+        return guess.correct;
       });
       handleKeyColors(correctArray);
-      return something
+      return something;
     }
 
     const inWordList = (word: string) => {
       return words.includes(word);
+    }
+
+    const animateInAnswer = () => {
+      anime({
+        targets: '.answer',
+        easing: 'spring(.8, 90, 9, 0)',
+        delay: 100,
+        translateY: 100,
+        opacity: [0,1]
+      })
+    }
+
+    const animateOutAnswer = () => {
+      anime({
+        targets: '.answer',
+        easing: 'spring(.8, 90, 9, 0)',
+        delay: 100,
+        translateY: 0,
+        opacity: [1,0]
+      })
     }
 
     const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], locked: boolean, row: number}[]) => {
@@ -282,9 +325,14 @@ const Home: NextPage = () => {
         setGuessesState(guessesState => guessesStateCopy)
         if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
           setGamePlaying(false);
-          handleWinAnimation().then(() => setWinAnimationPlaying(false));
+          handleWinAnimation().then(() => {setWinAnimationPlaying(false); setResetButtonClickable(true);});
         } else {
           handleAnimations(guessIndex, correctArrayMap);
+          if (guessIndex === 5) {
+            setLoseAnimationPlaying(true);
+            handleLoseAnimation().then(() => {setLoseAnimationPlaying(false); setResetButtonClickable(true); animateOutAnswer();});
+            setGamePlaying(false);
+          }
         }
         guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
       } else {
@@ -326,6 +374,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-200">
         <div className="w-11/12 xs:w-10/12 md:w-auto flex flex-col items-center justify-center gap-2 sm:gap-4">
+          <Answer word={randomWordState} />
           <Row guessState={guessesState[0]!} />
           <Row guessState={guessesState[1]!} />
           <Row guessState={guessesState[2]!} />
@@ -348,7 +397,7 @@ const Home: NextPage = () => {
             theme="hg-theme-default custom-keyboard"
             buttonTheme={buttonThemes}
           />
-          <ResetButton onClick={handleResetLogic} />
+          <ResetButton onClick={handleResetLogic} clickable={resetButtonClickable} />
         </div>
       </main>
     </>
