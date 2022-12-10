@@ -4,7 +4,6 @@ import Box from "./box"
 type RowProps = {
     guessState : {
         guess: string
-        locked: boolean
         row: number
     }
 }
