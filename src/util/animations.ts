@@ -172,9 +172,10 @@ export const animateKeyboardThemeChange = (keyboardState: { A: string; B: string
     async function asyncKeyboardThemeChange (alphabetArray: string[]) {
       for (let i = 0; i <= alphabetArray.length; i++) {
         const t = Math.random() * 60
-        const x = await new Promise(r => {
+        await new Promise(r => {
           setTimeout(r, t);
           const color = answerToColor(keyboardState[alphabetArray[i] as keyof unknown ]);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           changeKeyColor(color, alphabetArray[i]!)
         });
       }
