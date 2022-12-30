@@ -45,7 +45,6 @@ const Home: NextPage = () => {
   useEffect(() => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
     setRandomWordState(randomWordState => randomWord);
-    console.log(randomWord);
   }, []);
 
   useEffect(() => {
@@ -59,7 +58,7 @@ const Home: NextPage = () => {
     if (winAnimationPlaying) return;
     if (loseAnimationPlaying) return;
     if (resetAnimationPlaying) return;
-    setResetButtonClickable(false);
+    setResetButtonClickable(resetButtonClickable => !resetButtonClickable);
     handleResetAnimation().then(() => {
       const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
       setGuessesState([
@@ -77,15 +76,15 @@ const Home: NextPage = () => {
         Y: "", Z: ""
       });
       setGuessIndex(0);
-      setGamePlaying(true);
+      setGamePlaying(gamePlaying => !gamePlaying);
       setRandomWordState(randomWordState => randomWord);
-      setResetAnimationPlaying(false);
+      setResetAnimationPlaying(resetAnimationPlaying => !resetAnimationPlaying);
       console.log(randomWord);
     });
   }
 
   const handleResetAnimation = () => {
-    setResetAnimationPlaying(true)
+    setResetAnimationPlaying(resetAnimationPlaying => !resetAnimationPlaying)
     animateLettersInvisible().then(() => {
       animateLettersScaleOne();
     })
@@ -114,7 +113,7 @@ const Home: NextPage = () => {
   }
 
   const handleDeleteAnimation = (row: number, column: number) => {
-    setDeleteAnimationPlaying(true);
+    setDeleteAnimationPlaying(deleteAnimationPlaying => !deleteAnimationPlaying);
     return animateLetterDelete(row, column);
   }
 
@@ -125,7 +124,7 @@ const Home: NextPage = () => {
   }
 
   const handleWinAnimation = () => {
-    setWinAnimationPlaying(true);
+    setWinAnimationPlaying(winAnimationPlaying => !winAnimationPlaying);
     for (let i = guessIndex; i < 6; i++){
       for (let x = 0; x < 5; x++){
         isDarkMode() ?
@@ -198,20 +197,20 @@ const Home: NextPage = () => {
       guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap};
       setGuessesState(guessesState => guessesStateCopy);
       if (correctArrayMap.filter((answer) => answer === "Y").length === 5) {
-        setGamePlaying(false);
-        handleWinAnimation().then(() => {setWinAnimationPlaying(false); setResetButtonClickable(true);});
+        setGamePlaying(gamePlaying => !gamePlaying);
+        handleWinAnimation().then(() => {setWinAnimationPlaying(winAnimationPlaying => !winAnimationPlaying); setResetButtonClickable(resetButtonClickable => !resetButtonClickable);});
       } else {
         handleTileColorAnimation(guessIndex, correctArrayMap);
         if (guessIndex === 5) {
-          setLoseAnimationPlaying(true);
-          handleLoseAnimation().then(() => {setLoseAnimationPlaying(false); setResetButtonClickable(true); animateOutAnswer();});
-          setGamePlaying(false);
+          setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying);
+          handleLoseAnimation().then(() => {setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying); setResetButtonClickable(resetButtonClickable => !resetButtonClickable); animateOutAnswer();});
+          setGamePlaying(gamePlaying => !gamePlaying);
         }
       }
-      guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
+      guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(gamePlaying => !gamePlaying);
     } else {
-        setNotWordAnimationPlaying(true);
-        animateRowShake(guessIndex).then(() => {setNotWordAnimationPlaying(false); console.log("done")});
+        setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying);
+        animateRowShake(guessIndex).then(() => {setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying); console.log("done")});
     }
   }
 
@@ -234,14 +233,14 @@ const Home: NextPage = () => {
       handleDeleteAnimation(guessIndex, guessesState[guessIndex]!.guess.length-1).then(() => {
         guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, guess: currentGuess.slice(0, -1)};
         setGuessesState(guessesState => guessesStateCopy);
-        setDeleteAnimationPlaying(false);
+        setDeleteAnimationPlaying(deleteAnimationPlaying => !deleteAnimationPlaying);
       })
     }
   }
 
   const animateThemeChange = (guessesState: { guess: string; correctArray: string[]; row: number; }[], keyboardState: { A: string; B: string; C: string; D: string; E: string; F: string; G: string; H: string; I: string; J: string; K: string; L: string; M: string; N: string; O: string; P: string; Q: string; R: string; S: string; T: string; U: string; V: string; W: string; X: string; Y: string; Z: string; }) => {
     animateTilesThemeChange(guessesState);
-    animateKeyboardThemeChange(keyboardState).then(() => setThemeChanging(false));
+    animateKeyboardThemeChange(keyboardState).then(() => setThemeChanging(themeChanging => !themeChanging));
   }
 
   const handleThemeChange = () => {
@@ -250,7 +249,7 @@ const Home: NextPage = () => {
     if (loseAnimationPlaying) return;
     if (resetAnimationPlaying) return;
     setTheme(theme === 'dark' ? 'light' : 'dark');
-    setThemeChanging(true);
+    setThemeChanging(themeChanging => !themeChanging);
     animateThemeChange(guessesState, keyboardState);
   }
 
