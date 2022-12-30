@@ -34,6 +34,7 @@ const Home: NextPage = () => {
   const [gamePlaying, setGamePlaying] = useState(true);
   const [randomWordState, setRandomWordState] = useState("");
   const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
+  const [notWordAnimationPlaying, setNotWordAnimationPlaying] = useState(false);
   const [winAnimationPlaying, setWinAnimationPlaying] = useState(false);
   const [resetAnimationPlaying, setResetAnimationPlaying] = useState(false);
   const [loseAnimationPlaying, setLoseAnimationPlaying] = useState(false);
@@ -51,9 +52,10 @@ const Home: NextPage = () => {
     document.addEventListener("keydown", handleKeyDown, false);
     return () => document.removeEventListener("keydown", handleKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState, themeChanging]);
+  }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState, themeChanging, notWordAnimationPlaying]);
 
   const handleResetLogic = () => {
+    if (themeChanging) return;
     if (winAnimationPlaying) return;
     if (loseAnimationPlaying) return;
     if (resetAnimationPlaying) return;
@@ -190,6 +192,7 @@ const Home: NextPage = () => {
   }
 
   const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], row: number}[]) => {
+    if (notWordAnimationPlaying) return;
     if (inWordList(guessesStateCopy[guessIndex]!.guess) && guessesState[guessIndex]!.guess.length === 5) {
       const correctArrayMap = createCorrectArrayMap(guessesStateCopy[guessIndex]!.guess);
       guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap};
@@ -207,7 +210,8 @@ const Home: NextPage = () => {
       }
       guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(false);
     } else {
-        animateRowShake(guessIndex);
+        setNotWordAnimationPlaying(true);
+        animateRowShake(guessIndex).then(() => {setNotWordAnimationPlaying(false); console.log("done")});
     }
   }
 
@@ -242,6 +246,9 @@ const Home: NextPage = () => {
 
   const handleThemeChange = () => {
     if (themeChanging) return;
+    if (winAnimationPlaying) return;
+    if (loseAnimationPlaying) return;
+    if (resetAnimationPlaying) return;
     setTheme(theme === 'dark' ? 'light' : 'dark');
     setThemeChanging(true);
     animateThemeChange(guessesState, keyboardState);

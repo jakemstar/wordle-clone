@@ -90,12 +90,12 @@ export const animateLettersInvisible = () => {
 
 export const animateRowShake = (row: number) => {
     const xMax = 16;
-    anime({
+    return anime({
         targets: `.box-${row}`,
         easing: 'easeInOutSine',
         duration: 550,
         translateX: [{value: xMax * -1}, {value: xMax}, {value: xMax/-2}, {value: xMax/2}, {value: 0}]
-    });
+    }).finished;
 }
 
 export const animateLetterIn = (row: number, column: number) => {
