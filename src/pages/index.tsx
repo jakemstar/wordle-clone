@@ -44,9 +44,10 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
+    animateKeyboardThemeChange(keyboardState);
     setRandomWordState(randomWordState => randomWord);
     console.log(randomWord);
-  }, []);
+  }, [keyboardState]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown, false);
