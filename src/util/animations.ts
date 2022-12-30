@@ -109,13 +109,13 @@ export const animateLetterIn = (row: number, column: number) => {
 }
 
 export const animateOutAnswer = () => {
-    anime({
+    return anime({
         targets: '.answer',
         easing: 'spring(.8, 90, 9, 0)',
         delay: 100,
         translateY: 0,
         opacity: [1,0]
-    });
+    }).finished;
 }
 
 export const animateInAnswer = () => {

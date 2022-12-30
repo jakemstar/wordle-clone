@@ -33,6 +33,7 @@ const Home: NextPage = () => {
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
   const [randomWordState, setRandomWordState] = useState("");
+  const [hiddenAnswerState, setHiddenAnswerState] = useState("");
   const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
   const [notWordAnimationPlaying, setNotWordAnimationPlaying] = useState(false);
   const [winAnimationPlaying, setWinAnimationPlaying] = useState(false);
@@ -120,6 +121,7 @@ const Home: NextPage = () => {
   }
 
   const handleLoseAnimation = () => {
+    setHiddenAnswerState(hiddenAnswerState => randomWordState);
     animateInAnswer();
     animateKeysOut();
     return animateResetButtonVisible();
@@ -204,9 +206,9 @@ const Home: NextPage = () => {
       } else {
         handleTileColorAnimation(guessIndex, correctArrayMap);
         if (guessIndex === 5) {
-          setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying);
-          handleLoseAnimation().then(() => {setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying); setResetButtonClickable(resetButtonClickable => !resetButtonClickable); animateOutAnswer();});
           setGamePlaying(gamePlaying => !gamePlaying);
+          setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying);
+          handleLoseAnimation().then(() => {setGamePlaying(gamePlaying => !gamePlaying); setLoseAnimationPlaying(false); setResetButtonClickable(true); animateOutAnswer();});
         }
       }
       guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(gamePlaying => !gamePlaying);
@@ -264,7 +266,7 @@ const Home: NextPage = () => {
       <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-blue-200 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-700">
         <div className="flex flex-col items-center justify-center w-11/12 gap-2 xs:w-10/12 md:w-auto sm:gap-4">
           <DarkModeButton onClick={handleThemeChange} />
-          <Answer word={randomWordState} />
+          <Answer word={hiddenAnswerState} />
           <Row guessState={guessesState[0]!} />
           <Row guessState={guessesState[1]!} />
           <Row guessState={guessesState[2]!} />
