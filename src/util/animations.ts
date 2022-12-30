@@ -155,11 +155,11 @@ export const changeKeyColor = (color: string, answer: string) => {
     });
 }
 
-export const answerToColor = (answer: string) => {
+export const answerToColor = (letter: string) => {
     if(isDarkMode()) {
-        if (answer === 'Y') return "#14532d"; if (answer === 'M') return "#9a3412"; if (answer === 'N') return "#9f1239"; return '#0f172a';
+        if (letter === 'Y') return "#14532d"; if (letter === 'M') return "#9a3412"; if (letter === 'N') return "#9f1239"; return '#0f172a';
     } else {
-        if (answer === 'Y') return "#bbf7d0"; if (answer === 'M') return "#fed7aa"; if (answer === 'N') return "#fecdd3"; return "#f8fafc";
+        if (letter === 'Y') return "#bbf7d0"; if (letter === 'M') return "#fed7aa"; if (letter === 'N') return "#fecdd3"; return "#f8fafc";
     }
 }
 

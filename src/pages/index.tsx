@@ -45,6 +45,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
     setRandomWordState(randomWordState => randomWord);
+    console.log(randomWord);
   }, []);
 
   useEffect(() => {
@@ -210,7 +211,7 @@ const Home: NextPage = () => {
       guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(gamePlaying => !gamePlaying);
     } else {
         setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying);
-        animateRowShake(guessIndex).then(() => {setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying); console.log("done")});
+        animateRowShake(guessIndex).then(() => setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying));
     }
   }
 
