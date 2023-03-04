@@ -57,6 +57,7 @@ const Home: NextPage = () => {
   }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState, themeChanging, notWordAnimationPlaying]);
 
   const handleResetLogic = () => {
+    if (gamePlaying) return;
     if (themeChanging) return;
     if (winAnimationPlaying) return;
     if (loseAnimationPlaying) return;
@@ -265,7 +266,6 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-blue-200 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-700">
         <div className="flex flex-col items-center justify-center w-11/12 gap-2 xs:w-10/12 md:w-auto sm:gap-4">
-          <DarkModeButton onClick={handleThemeChange} />
           <Answer word={hiddenAnswerState} />
           <Row guessState={guessesState[0]!} />
           <Row guessState={guessesState[1]!} />
@@ -290,6 +290,7 @@ const Home: NextPage = () => {
             buttonTheme={buttonThemes}
           />
           <ResetButton onClick={handleResetLogic} clickable={resetButtonClickable} />
+          <DarkModeButton onClick={handleThemeChange} />
         </div>
       </main>
     </>
