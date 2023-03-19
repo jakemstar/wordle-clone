@@ -55,7 +55,7 @@ const Home: NextPage = () => {
     document.addEventListener("keydown", handleKeyDown, false);
     return () => document.removeEventListener("keydown", handleKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState, themeChanging, notWordAnimationPlaying]);
+  }, [guessesState, guessIndex, deleteAnimationPlaying, keyboardState, themeChanging, notWordAnimationPlaying, theme]);
 
   const handleResetLogic = () => {
     if (gamePlaying) return;
