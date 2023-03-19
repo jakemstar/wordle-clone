@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Keyboard from 'react-simple-keyboard';
 import Answer from "../components/answer";
 import DarkModeButton from "../components/darkmodeButton";
+import DebugStats from "../components/gameStats";
 import ResetButton from "../components/resetButton";
 import Row from "../components/row";
 import alphabet from "../util/alphabet.json";
@@ -32,6 +33,7 @@ const Home: NextPage = () => {
   });
   const [guessIndex, setGuessIndex] = useState(0);
   const [gamePlaying, setGamePlaying] = useState(true);
+  const [debugVisible, setDebugVisible] = useState(false);
   const [randomWordState, setRandomWordState] = useState("");
   const [hiddenAnswerState, setHiddenAnswerState] = useState("");
   const [deleteAnimationPlaying, setDeleteAnimationPlaying] = useState(false);
@@ -47,7 +49,6 @@ const Home: NextPage = () => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
     animateKeyboardThemeChange(keyboardState);
     setRandomWordState(randomWordState => randomWord);
-    console.log(randomWord);
   }, [keyboardState]);
 
   useEffect(() => {
@@ -83,7 +84,6 @@ const Home: NextPage = () => {
       setGamePlaying(gamePlaying => !gamePlaying);
       setRandomWordState(randomWordState => randomWord);
       setResetAnimationPlaying(resetAnimationPlaying => !resetAnimationPlaying);
-      console.log(randomWord);
     });
   }
 
@@ -197,6 +197,7 @@ const Home: NextPage = () => {
 
   const handleEnterDown = (guessesStateCopy: {guess: string, correctArray: string[], row: number}[]) => {
     if (notWordAnimationPlaying) return;
+    if (guessesState[guessIndex]?.guess === "debug") setDebugVisible(debugVisible => !debugVisible);
     if (inWordList(guessesStateCopy[guessIndex]!.guess) && guessesState[guessIndex]!.guess.length === 5) {
       const correctArrayMap = createCorrectArrayMap(guessesStateCopy[guessIndex]!.guess);
       guessesStateCopy[guessIndex] = {...guessesStateCopy[guessIndex]!, correctArray: correctArrayMap};
@@ -209,10 +210,10 @@ const Home: NextPage = () => {
         if (guessIndex === 5) {
           setGamePlaying(gamePlaying => !gamePlaying);
           setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying);
-          handleLoseAnimation().then(() => {setGamePlaying(gamePlaying => !gamePlaying); setLoseAnimationPlaying(false); setResetButtonClickable(true); animateOutAnswer();});
+          handleLoseAnimation().then(() => {setLoseAnimationPlaying(loseAnimationPlaying => !loseAnimationPlaying); setResetButtonClickable(resetButtonClickable => !resetButtonClickable); animateOutAnswer();});
         }
       }
-      guessIndex < 5 ? setGuessIndex(guessIndex => guessIndex + 1) : setGamePlaying(gamePlaying => !gamePlaying);
+      if (guessIndex < 5) setGuessIndex(guessIndex => guessIndex + 1);
     } else {
         setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying);
         animateRowShake(guessIndex).then(() => setNotWordAnimationPlaying(notWordAnimationPlaying => !notWordAnimationPlaying));
@@ -291,6 +292,10 @@ const Home: NextPage = () => {
           />
           <ResetButton onClick={handleResetLogic} clickable={resetButtonClickable} />
           <DarkModeButton onClick={handleThemeChange} />
+          <DebugStats visible={debugVisible} guessIndex={guessIndex} gamePlaying={gamePlaying} hiddenAnswerState={hiddenAnswerState}
+          deleteAnimationPlaying={deleteAnimationPlaying} notWordAnimationPlaying={notWordAnimationPlaying} winAnimationPlaying={winAnimationPlaying}
+          resetAnimationPlaying={resetAnimationPlaying} loseAnimationPlaying={loseAnimationPlaying} resetButtonClickable={resetButtonClickable}
+          themeChanging={themeChanging} guessesState={guessesState} randomWordState={randomWordState} />
         </div>
       </main>
     </>

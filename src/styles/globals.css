@@ -192,3 +192,9 @@ li.hg-candidate-box-list-item:active {
 .resetButton {
   opacity: 0;
 }
+
+.topLeft {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
