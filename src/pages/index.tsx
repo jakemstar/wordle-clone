@@ -43,7 +43,7 @@ const Home: NextPage = () => {
   const [loseAnimationPlaying, setLoseAnimationPlaying] = useState(false);
   const [resetButtonClickable, setResetButtonClickable] = useState(false);
   const [themeChanging, setThemeChanging] = useState(false);
-  const {theme, setTheme} = useTheme()
+  const {theme, systemTheme, setTheme} = useTheme()
 
   useEffect(() => {
     const randomWord: string = words[Math.floor(Math.random()*words.length)]!;
@@ -254,9 +254,14 @@ const Home: NextPage = () => {
     if (winAnimationPlaying) return;
     if (loseAnimationPlaying) return;
     if (resetAnimationPlaying) return;
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(themeLogic());
     setThemeChanging(themeChanging => !themeChanging);
     animateThemeChange(guessesState, keyboardState);
+  }
+
+  const themeLogic = () => {
+    if (theme === 'system') return systemTheme === 'dark' ? 'light' : 'dark';
+    return theme === 'dark' ? 'light' : 'dark';
   }
 
   return (
